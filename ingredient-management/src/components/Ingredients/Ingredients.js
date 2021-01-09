@@ -1,12 +1,28 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useReducer, useState, useEffect, useCallback } from 'react';
 import ErrorModal from '../UI/ErrorModal';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
 import Search from './Search';
 
+const ingredientReducer = (currentIngredients, action) => {
+  switch (action.type) {
+    case 'SET':
+      return action.ingredients;
+    case 'ADD':
+      return [...currentIngredients, action.ingredient];
+    case 'DELETE':
+      return currentIngredients.filter(ing => ing.id !== action.id);
+    default:
+      throw new Error('Should not get here');
+  }
+}
+
 const Ingredients = () => {
-  const [ingredients, setIngredients] = useState([]);
+
+  const [ingredients, dispatch] = useReducer(ingredientReducer, []);
+
+  // const [ingredients, setIngredients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
 
@@ -47,15 +63,13 @@ const Ingredients = () => {
       .then((resData) => {
         console.log('<Ingredients> fetch data');
         // Set the response data name as ingredient id
-        setIngredients(prevIngredients => [
-          ...prevIngredients,
-          { id: resData.name, ...ingredient }
-        ]);
+        dispatch({ type: 'ADD', ingredient: { id: resData.name, ...ingredient } });
       });
   }
 
   const filteredIngredientsHandler = useCallback((filteredIngredients) => {
-    setIngredients(filteredIngredients);
+    // setIngredients(filteredIngredients);
+    dispatch({ type: 'SET', ingredients: filteredIngredients });
   }, []);
 
   const removeIngredientHandler = (ingredientId) => {
@@ -65,8 +79,7 @@ const Ingredients = () => {
     })
       .then((res) => {
         setIsLoading(false);
-        setIngredients(prevIngredients =>
-          prevIngredients.filter(ingredient => ingredient.id !== ingredientId));
+        dispatch({ type: 'DELETE', id: ingredientId });
       })
       .catch((err) => {
         setError('Something went wrong');
