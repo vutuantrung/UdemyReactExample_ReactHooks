@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 
 import Card from './UI/Card';
-import './Auth.css';
 import { AuthContext } from '../context/auth-context';
+import './Auth.css';
 
 const Auth = props => {
   const authContext = useContext(AuthContext);
