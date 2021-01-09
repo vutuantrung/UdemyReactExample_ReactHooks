@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ErrorModal from '../UI/ErrorModal';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
@@ -6,6 +7,8 @@ import Search from './Search';
 
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
 
   useEffect(() => {
     console.log('<Ingredients> re-render');
@@ -27,12 +30,17 @@ const Ingredients = () => {
   }, []);
 
   const addIngredientHandler = (ingredient) => {
+    // setting isloading state
+    setIsLoading(true);
+
+    // post data to firebase
     fetch('https://react-hooks-udpate-d7642-default-rtdb.firebaseio.com/ingredients.json', {
       method: 'POST',
       body: JSON.stringify(ingredient),
       headers: { 'Content-Type': 'application/json' }
     })
       .then((res) => {
+        setIsLoading(false);
         // Convert respons to json
         return res.json();
       })
@@ -51,19 +59,32 @@ const Ingredients = () => {
   }, []);
 
   const removeIngredientHandler = (ingredientId) => {
-    fetch(`https://react-hooks-udpate-d7642-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`, {
+    setIsLoading(true);
+    fetch(`https://react-hooks-udpate-d7642-default-rtdb.firebaseio.com/igredients/${ingredientId}.json`, {
       method: 'DELETE',
     })
       .then((res) => {
+        setIsLoading(false);
         setIngredients(prevIngredients =>
           prevIngredients.filter(ingredient => ingredient.id !== ingredientId));
+      })
+      .catch((err) => {
+        setError('Something went wrong');
       });
   }
 
+  const clearError = () => {
+    setError(null);
+    setIsLoading(false);
+  }
 
   return (
     <div className="App">
-      <IngredientForm onAddIngredient={addIngredientHandler} />
+      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
+
+      <IngredientForm
+        onAddIngredient={addIngredientHandler}
+        loading={isLoading} />
 
       <section>
         <Search onLoadIngredients={filteredIngredientsHandler} />
