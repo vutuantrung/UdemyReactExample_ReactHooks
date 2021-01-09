@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
@@ -8,6 +8,8 @@ const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
 
   useEffect(() => {
+    console.log('<Ingredients> re-render');
+
     fetch('https://react-hooks-udpate-d7642-default-rtdb.firebaseio.com/ingredients.json')
       .then((res) => (res.json()))
       .then((resData) => {
@@ -35,6 +37,7 @@ const Ingredients = () => {
         return res.json();
       })
       .then((resData) => {
+        console.log('<Ingredients> fetch data');
         // Set the response data name as ingredient id
         setIngredients(prevIngredients => [
           ...prevIngredients,
@@ -43,13 +46,26 @@ const Ingredients = () => {
       });
   }
 
+  console.log('create new filteredIngredientsHandler function object');
+
+  const filteredIngredientsHandler = useCallback((filteredIngredients) => {
+    setIngredients(filteredIngredients);
+  }, [])
+
+  // const filteredIngredientsHandler = (filteredIngredients) => {
+  //   setIngredients(filteredIngredients);
+  // };
+
   return (
     <div className="App">
       <IngredientForm onAddIngredient={addIngredientHandler} />
 
       <section>
-        <Search />
-        <IngredientList ingredients={ingredients} onRemoveItem={() => { }} />
+        <Search onLoadIngredients={filteredIngredientsHandler} />
+        <IngredientList
+          ingredients={ingredients}
+          onRemoveItem={() => { }}
+        />
       </section>
     </div>
   );
