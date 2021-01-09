@@ -46,15 +46,20 @@ const Ingredients = () => {
       });
   }
 
-  console.log('create new filteredIngredientsHandler function object');
-
   const filteredIngredientsHandler = useCallback((filteredIngredients) => {
     setIngredients(filteredIngredients);
-  }, [])
+  }, []);
 
-  // const filteredIngredientsHandler = (filteredIngredients) => {
-  //   setIngredients(filteredIngredients);
-  // };
+  const removeIngredientHandler = (ingredientId) => {
+    fetch(`https://react-hooks-udpate-d7642-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`, {
+      method: 'DELETE',
+    })
+      .then((res) => {
+        setIngredients(prevIngredients =>
+          prevIngredients.filter(ingredient => ingredient.id !== ingredientId));
+      });
+  }
+
 
   return (
     <div className="App">
@@ -64,7 +69,7 @@ const Ingredients = () => {
         <Search onLoadIngredients={filteredIngredientsHandler} />
         <IngredientList
           ingredients={ingredients}
-          onRemoveItem={() => { }}
+          onRemoveItem={removeIngredientHandler}
         />
       </section>
     </div>
