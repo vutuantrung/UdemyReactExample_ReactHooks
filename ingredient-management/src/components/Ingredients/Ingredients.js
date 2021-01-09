@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useCallback } from 'react';
+import React, { useReducer, useEffect, useCallback, useMemo } from 'react';
 import ErrorModal from '../UI/ErrorModal';
 
 import IngredientForm from './IngredientForm';
@@ -61,7 +61,7 @@ const Ingredients = () => {
       });
   }, []);
 
-  const addIngredientHandler = (ingredient) => {
+  const addIngredientHandler = useCallback((ingredient) => {
     // dispatch http state to set value of isLoading
     dispatchHttpState({ type: 'SEND' });
 
@@ -81,14 +81,14 @@ const Ingredients = () => {
         // Set the response data name as ingredient id
         dispatchIngredients({ type: 'ADD', ingredient: { id: resData.name, ...ingredient } });
       });
-  }
+  }, []);
 
   const filteredIngredientsHandler = useCallback((filteredIngredients) => {
     // setIngredients(filteredIngredients);
     dispatchIngredients({ type: 'SET', ingredients: filteredIngredients });
   }, []);
 
-  const removeIngredientHandler = (ingredientId) => {
+  const removeIngredientHandler = useCallback((ingredientId) => {
     dispatchHttpState({ type: 'SEND' });
     fetch(`https://react-hooks-udpate-d7642-default-rtdb.firebaseio.com/igredients/${ingredientId}.json`, {
       method: 'DELETE',
@@ -100,11 +100,18 @@ const Ingredients = () => {
       .catch((err) => {
         dispatchHttpState({ type: 'ERROR', errorMessage: err.message });
       });
-  }
+  }, []);
 
   const clearError = () => {
     dispatchHttpState({ type: 'CLEAR' });
   }
+
+  const ingredientList = useMemo(() => (
+    <IngredientList
+      ingredients={ingredients}
+      onRemoveItem={removeIngredientHandler}
+    />
+  ), [ingredients, removeIngredientHandler]);
 
   return (
     <div className="App">
@@ -116,10 +123,7 @@ const Ingredients = () => {
 
       <section>
         <Search onLoadIngredients={filteredIngredientsHandler} />
-        <IngredientList
-          ingredients={ingredients}
-          onRemoveItem={removeIngredientHandler}
-        />
+        {ingredientList}
       </section>
     </div>
   );
