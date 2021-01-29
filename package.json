@@ -1,0 +1,14 @@
+{
+  "name": "react-project-ingredient-management",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "cross-env": "5.0.5"
+  }
+}
